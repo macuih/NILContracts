@@ -1,8 +1,6 @@
 START NILTransparencyContract
 
 DEFINE struct Athlete {
-    name
-    school
     walletAddress
     isVerified
     array of NILContracts
