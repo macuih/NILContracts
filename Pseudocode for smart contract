@@ -24,10 +24,12 @@ DEFINE struct Transaction {
 DECLARE mapping from walletAddress to Athlete
 DECLARE array of all registered athletes
 
-FUNCTION registerAthlete(name, school)
-    REQUIRE msg.sender is not already registered
-    CREATE new Athlete struct
-    ADD to mapping and athlete array
+FUNCTION registerAthlete()
+    IF athlete already exists at msg.sender → revert
+    Create new Athlete:
+        - wallet = msg.sender
+        - isVerified = false
+    Store in mapping
 
 FUNCTION submitNILContract(sponsorName, value, description, isPublic)
     REQUIRE msg.sender is registered
