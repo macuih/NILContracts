@@ -19,8 +19,6 @@ contract NILTransparency {
     }
 
     struct Athlete {
-        string name;
-        string school;
         address wallet;
         bool isVerified;
         NILContract[] contracts;
