@@ -11,9 +11,8 @@ DEFINE struct Athlete {
 // essentially just descriptive information for auditing purposes
 
 DEFINE struct NILContract {
-    sponsorName
     contractValue (in ETH)
-    description
+    description     // this should be generic. Don't want anything giving away the payer to be written on chain.
     timestamp
     isPublic
 }
@@ -21,9 +20,9 @@ DEFINE struct NILContract {
 // this is where actual payments are being logged.
 
 DEFINE struct Transaction {
-    fromaddress
+    fromaddress     // only wallet address, not actual school or sponser name
     amount
-    purpose
+    purposen       //again, generic to protect privacy.
     timestamp
 }
 
