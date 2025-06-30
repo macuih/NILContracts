@@ -1,0 +1,52 @@
+START NILTransparencyContract
+
+DEFINE struct Athlete {
+    name
+    school
+    walletAddress
+    isVerified
+    array of NILContracts
+}
+
+DEFINE struct NILContract {
+    sponsorName
+    contractValue (in ETH)
+    description
+    timestamp
+    isPublic
+}
+
+DEFINE struct Transaction {
+    amount
+    purpose
+    timestamp
+    isVerified
+}
+
+DECLARE mapping from walletAddress to Athlete
+DECLARE array of all registered athletes
+
+FUNCTION registerAthlete(name, school)
+    REQUIRE msg.sender is not already registered
+    CREATE new Athlete struct
+    ADD to mapping and athlete array
+
+FUNCTION submitNILContract(sponsorName, value, description, isPublic)
+    REQUIRE msg.sender is registered
+    CREATE new NILContract struct
+    APPEND to sender's NILContract array
+
+FUNCTION logTransaction(amount, purpose, isVerified)
+    REQUIRE msg.sender is registered
+    CREATE new Transaction struct
+    ADD to sender's log
+
+FUNCTION viewAthleteContracts(address athleteAddress)
+    IF sender is the athlete OR contract isPublic == true
+        RETURN NILContracts
+
+FUNCTION verifyAthlete(address athleteAddress)
+    REQUIRE msg.sender is an authorized auditor
+    SET isVerified = true
+
+END NILTransparencyContract
