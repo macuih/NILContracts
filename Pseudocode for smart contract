@@ -1,5 +1,7 @@
 START NILTransparencyContract
 
+// only athletes wallet address used
+
 DEFINE struct Athlete {
     walletAddress
     isVerified
@@ -22,7 +24,7 @@ DEFINE struct NILContract {
 DEFINE struct Transaction {
     fromaddress     // only wallet address, not actual school or sponser name
     amount
-    purposen       //again, generic to protect privacy.
+    purpose       //again, generic to protect privacy.
     timestamp
 }
 
