@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 contract NILTransparencyContract {
     struct NILContract {
-        uint256 contractValue; // in wei
+        uint256 contractValue; // in wei, **need conversion in front end**
         string description;
         uint256 timestamp;
         bool isPublic;
