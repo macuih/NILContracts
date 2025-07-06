@@ -14,6 +14,28 @@ module.exports = function (deployer) {
   deployer.deploy(NILTransparencyContract);
 };
 
-
 cd nil-truffle
 truffle compile
+npx ganache
+
+vi truffle-config.js
+module.exports = {
+  networks: {
+    development: {
+      host: "127.0.0.1",     // Ganache (npx) default
+      port: 8545,            // Make sure it matches npx ganache
+      network_id: "*"        // Match any network ID
+    }
+  },
+
+  compilers: {
+    solc: {
+      version: "0.8.20",     // Match your Solidity version
+    }
+  }
+};
+
+
+### in new terminal
+cd nil-truffle
+truffle migrate --reset
