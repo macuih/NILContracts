@@ -1,3 +1,5 @@
+****** needed this: "npm install --save-dev ganache" ********
+
 mkdir nil-truffle
 cd nil-truffle
 truffle init
@@ -15,7 +17,6 @@ module.exports = function (deployer) {
 };
 
 cd nil-truffle
-truffle compile
 npx ganache
 
 vi truffle-config.js
@@ -38,4 +39,5 @@ module.exports = {
 
 ### in new terminal
 cd nil-truffle
+truffle compile
 truffle migrate --reset
