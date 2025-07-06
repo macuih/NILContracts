@@ -4,3 +4,16 @@ truffle init
 
 cd contracts
 vi nil.sol
+
+cd migrations
+vi 2_deploy_contracts.js
+
+const NILTransparencyContract = artifacts.require("NILTransparencyContract");
+
+module.exports = function (deployer) {
+  deployer.deploy(NILTransparencyContract);
+};
+
+
+cd nil-truffle
+truffle compile
