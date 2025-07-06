@@ -16,3 +16,5 @@ npx create-react-app nil
 cd nil
 
 npm start
+
+npx hardhat init
