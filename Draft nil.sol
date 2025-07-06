@@ -101,24 +101,35 @@ contract NILTransparencyContract {
 
         athletes[msg.sender].transactions.push(txRecord);
     }
-    
-    // returns total number of NIL contracts fo an athlete
-    function getNILContractCount(address athleteAddress) external view returns (uint256) {
-        return athletes[athleteAddress].nilContracts.length;
-    }
 
-    // returns a specific NIL contract by index for that athelte
-    function getNILContract(address athleteAddress, uint index) external view returns (
-        uint256 contractValue,
-        string memory description,
-        uint256 timestamp,
-        bool isPublic
-    ) {
-        require(index < athletes[athleteAddress].nilContracts.length, "Index out of bounds");
-        NILContract memory c = athletes[athleteAddress].nilContracts[index];
-        return (c.contractValue, c.description, c.timestamp, c.isPublic);
-    }
+    // View contracts (with public/private filtering)
+    function viewAthleteContracts(address athleteAddress) external view returns (NILContract[] memory) {
+        Athlete storage athlete = athletes[athleteAddress];
+        require(athlete.walletAddress != address(0), "Athlete not found");
 
+        if (msg.sender == athleteAddress) {
+            return athlete.nilContracts;
+        }
+
+        // Return only public contracts
+        uint256 count = 0;
+        for (uint256 i = 0; i < athlete.nilContracts.length; i++) {
+            if (athlete.nilContracts[i].isPublic) {
+                count++;
+            }
+        }
+
+        NILContract[] memory publicContracts = new NILContract[](count);
+        uint256 j = 0;
+        for (uint256 i = 0; i < athlete.nilContracts.length; i++) {
+            if (athlete.nilContracts[i].isPublic) {
+                publicContracts[j] = athlete.nilContracts[i];
+                j++;
+            }
+        }
+
+        return publicContracts;
+    }
 
     // Verify athlete (restricted to owner/auditor)
     function verifyAthlete(address athleteAddress) external onlyOwner {
