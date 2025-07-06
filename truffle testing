@@ -1,0 +1,6 @@
+mkdir nil-truffle
+cd nil-truffle
+truffle init
+
+cd contracts
+vi nil.sol
