@@ -1,0 +1,9 @@
+Signer 0 (deployer of project) is the only user that gets admin privileges. 
+Athletes need to register, get verified by signer 0 with admin privileges to use athlete features.
+
+To create an account, copy private key and import user and copy paste private key of signer 0.
+
+For metamask network, need the public dns of the instance as the network url with :8545 at the end (http:// before)
+- chain id is 31337
+
+Have to start fresh and cannot restart node as it will have memory. So if something goes run, shut off terminals and start over with fresh script deployment for contract deployment etc.
