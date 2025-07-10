@@ -1,3 +1,13 @@
+truffle develop
+migrate --reset
+test
+
+
+
+
+
+Below doesn't work
+
 To test TestNil.sol and TestNil.js:
 
 
