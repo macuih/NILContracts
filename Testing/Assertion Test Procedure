@@ -1,0 +1,16 @@
+To test TestNil.sol and TestNil.js:
+
+
+Need to check truffle-config.js, migrations deploy contracts file.
+
+## terminal 1:
+
+ganache-cli
+
+
+## Seperate terminal:
+
+truffle compile
+
+truffle test test/TestNil.js
+truffle test test/TestNil.sol
