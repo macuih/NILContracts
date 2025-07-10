@@ -9,14 +9,14 @@ contract TestNILTransparency {
 
     function beforeEach() public {
         nilContract = new NILTransparencyContract();
-        nilContract.registerAthlete(); // address(this) registers
+        nilContract.registerAthlete(); // address(this) registers itself
     }
 
     // Test 1: Register athlete
     function testRegisterAthlete() public {
-        NILTransparencyContract.Athlete memory athlete = nilContract.athletes(address(this));
-        Assert.equal(athlete.walletAddress, address(this), "Wallet address should match caller");
-        Assert.equal(athlete.isVerified, false, "Athlete should be unverified by default");
+        (address wallet, bool verified,,) = nilContract.getAthlete(address(this));
+        Assert.equal(wallet, address(this), "Wallet address should match caller");
+        Assert.equal(verified, false, "Athlete should be unverified by default");
 
         address registered = nilContract.registeredAthletes(0);
         Assert.equal(registered, address(this), "Athlete address should be in the list");
@@ -38,12 +38,13 @@ contract TestNILTransparency {
 
     // Test 3: Verify athlete
     function testVerifyAthlete() public {
+        // This test contract is the "owner" since it deployed the contract
         nilContract.verifyAthlete(address(this));
-        NILTransparencyContract.Athlete memory athlete = nilContract.athletes(address(this));
-        Assert.equal(athlete.isVerified, true, "Athlete should be marked as verified");
+        (, bool verified,,) = nilContract.getAthlete(address(this));
+        Assert.equal(verified, true, "Athlete should be marked as verified");
     }
 
-    // ✅ Test 4: Log a non-payment transaction
+    // Test 4: Log a non-payment transaction
     function testLogTransaction() public {
         string memory reason = "Appearance fee";
         uint256 amount = 1 ether;
