@@ -142,7 +142,7 @@ contract NILTransparencyContract {
     }
 
     // ✅ Helper function for tests: return athlete summary info
-    function getAthlete(address athleteAddress) external view returns (
+    function getAthlete(address athleteAddress) public view returns (
         address wallet,
         bool isVerified,
         uint256 contractCount,
