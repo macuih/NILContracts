@@ -9,7 +9,7 @@ contract TestNILTransparency {
 
     function beforeEach() public {
         nilContract = new NILTransparencyContract();
-        nilContract.registerAthlete(); // address(this) registers itself
+        nilContract.registerAthlete(); // The test contract registers itself
     }
 
     function testRegisterAthlete() public {
@@ -28,10 +28,10 @@ contract TestNILTransparency {
         nilContract.submitNILContract(value, desc, true);
         NILTransparencyContract.NILContract[] memory contracts = nilContract.viewAthleteContracts(address(this));
 
-        Assert.equal(contracts.length, 1, "One NIL contract should be stored");
-        Assert.equal(contracts[0].contractValue, value, "Stored contract value mismatch");
+        Assert.equal(contracts.length, 1, "Should store one NIL contract");
+        Assert.equal(contracts[0].contractValue, value, "Contract value should match");
         Assert.equal(contracts[0].isPublic, true, "Contract visibility mismatch");
-        Assert.equal(contracts[0].description, desc, "Contract description mismatch");
+        Assert.equal(contracts[0].description, desc, "Description mismatch");
     }
 
     function testVerifyAthlete() public {
@@ -47,9 +47,9 @@ contract TestNILTransparency {
         nilContract.logTransaction(amount, reason);
         NILTransparencyContract.Transaction[] memory txs = nilContract.getAthleteTransactions(address(this));
 
-        Assert.equal(txs.length, 1, "There should be one logged transaction");
+        Assert.equal(txs.length, 1, "Should log one transaction");
         Assert.equal(txs[0].amount, amount, "Transaction amount mismatch");
-        Assert.equal(txs[0].purpose, reason, "Transaction purpose mismatch");
-        Assert.equal(txs[0].fromAddress, address(this), "Sender address mismatch");
+        Assert.equal(txs[0].purpose, reason, "Purpose mismatch");
+        Assert.equal(txs[0].fromAddress, address(this), "Sender mismatch");
     }
 }
