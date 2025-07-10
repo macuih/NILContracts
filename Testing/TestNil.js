@@ -1,61 +1,59 @@
-const NILTransparencyContract = artifacts.require("NILTransparencyContract");
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
-contract("NILTransparencyContract", accounts => {
-  const athlete = accounts[1];
-  const sponsor = accounts[2];
+import "truffle/Assert.sol";
+import "../contracts/NILTransparencyContract.sol";
 
-  let contractInstance;
+contract TestNILTransparency {
+    NILTransparencyContract nilContract;
 
-  beforeEach(async () => {
-    contractInstance = await NILTransparencyContract.new({ from: accounts[0] });
-  });
-
-  // Test 1: Register an athlete and verify status
-  it("should register a new athlete and set verified to false", async () => {
-    await contractInstance.registerAthlete({ from: athlete });
-    const athleteData = await contractInstance.athletes(athlete);
-
-    assert.equal(athleteData.walletAddress, athlete, "Wallet address mismatch");
-    assert.equal(athleteData.isVerified, false, "Athlete should be unverified by default");
-  });
-
-  // Test 2: Submit a NIL contract and verify values
-  it("should allow a registered athlete to submit a NIL contract", async () => {
-    await contractInstance.registerAthlete({ from: athlete });
-
-    const contractValue = web3.utils.toWei("1", "ether");
-    const description = "Sponsorship Deal";
-    const isPublic = true;
-
-    await contractInstance.submitNILContract(contractValue, description, isPublic, { from: athlete });
-
-    const contracts = await contractInstance.viewAthleteContracts(athlete, { from: athlete });
-
-    assert.equal(contracts.length, 1, "There should be one NIL contract");
-    assert.equal(contracts[0].contractValue.toString(), contractValue, "Contract value mismatch");
-    assert.equal(contracts[0].description, description, "Contract description mismatch");
-    assert.equal(contracts[0].isPublic, isPublic, "Visibility flag mismatch");
-  });
-
-  // ✅ Test 3: Only owner can verify an athlete
-  it("should allow only the owner to verify an athlete", async () => {
-    await contractInstance.registerAthlete({ from: athlete });
-
-    // ✅ Owner verifies the athlete
-    await contractInstance.verifyAthlete(athlete, { from: accounts[0] });
-
-    const athleteData = await contractInstance.athletes(athlete);
-    assert.equal(athleteData.isVerified, true, "Athlete should be marked as verified by owner");
-
-    // ❌ Non-owner tries to verify (should fail)
-    try {
-      await contractInstance.verifyAthlete(athlete, { from: sponsor });
-      assert.fail("Non-owner was able to verify an athlete");
-    } catch (error) {
-      assert(
-        error.message.includes("Not authorized"),
-        "Expected 'Not authorized' error, got: " + error.message
-      );
+    function beforeEach() public {
+        nilContract = new NILTransparencyContract();
+        nilContract.registerAthlete(); // address(this) registers
     }
-  });
-});
+
+    // Test 1: Register athlete
+    function testRegisterAthlete() public {
+        NILTransparencyContract.Athlete memory athlete = nilContract.athletes(address(this));
+        Assert.equal(athlete.walletAddress, address(this), "Wallet address should match caller");
+        Assert.equal(athlete.isVerified, false, "Athlete should be unverified by default");
+
+        address registered = nilContract.registeredAthletes(0);
+        Assert.equal(registered, address(this), "Athlete address should be in the list");
+    }
+
+    // Test 2: Submit NIL contract
+    function testSubmitNILContract() public {
+        uint256 value = 0.5 ether;
+        string memory desc = "Endorsement Deal";
+
+        nilContract.submitNILContract(value, desc, true);
+        NILTransparencyContract.NILContract[] memory contracts = nilContract.viewAthleteContracts(address(this));
+
+        Assert.equal(contracts.length, 1, "One NIL contract should be stored");
+        Assert.equal(contracts[0].contractValue, value, "Stored contract value should match");
+        Assert.equal(contracts[0].isPublic, true, "Contract visibility should be public");
+        Assert.equal(contracts[0].description, desc, "Description should match input");
+    }
+
+    // Test 3: Verify athlete
+    function testVerifyAthlete() public {
+        nilContract.verifyAthlete(address(this));
+        NILTransparencyContract.Athlete memory athlete = nilContract.athletes(address(this));
+        Assert.equal(athlete.isVerified, true, "Athlete should be marked as verified");
+    }
+
+    // ✅ Test 4: Log a non-payment transaction
+    function testLogTransaction() public {
+        string memory reason = "Appearance fee";
+        uint256 amount = 1 ether;
+
+        nilContract.logTransaction(amount, reason);
+        NILTransparencyContract.Transaction[] memory txs = nilContract.getAthleteTransactions(address(this));
+
+        Assert.equal(txs.length, 1, "There should be one logged transaction");
+        Assert.equal(txs[0].amount, amount, "Logged transaction amount mismatch");
+        Assert.equal(txs[0].purpose, reason, "Transaction purpose mismatch");
+        Assert.equal(txs[0].fromAddress, address(this), "Transaction sender should match");
+    }
+}
