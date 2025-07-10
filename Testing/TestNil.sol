@@ -7,43 +7,53 @@ import "../contracts/NILTransparencyContract.sol";
 contract TestNILTransparency {
     NILTransparencyContract nilContract;
 
-    // Set up before tests
     function beforeEach() public {
         nilContract = new NILTransparencyContract();
+        nilContract.registerAthlete(); // address(this) registers
     }
 
-    // Test 1: Register an athlete and verify mapping/array update
+    // Test 1: Register athlete
     function testRegisterAthlete() public {
-        // Call registerAthlete as this contract
-        nilContract.registerAthlete();
+        NILTransparencyContract.Athlete memory athlete = nilContract.athletes(address(this));
+        Assert.equal(athlete.walletAddress, address(this), "Wallet address should match caller");
+        Assert.equal(athlete.isVerified, false, "Athlete should be unverified by default");
 
-        // Check athlete mapping
-        ( , bool isVerified, , ) = nilContract.athletes(address(this));
-        Assert.equal(isVerified, false, "Newly registered athlete should not be verified");
-
-        // Check that address is in registeredAthletes array
-        address[] memory list = nilContract.registeredAthletes();
-        Assert.equal(list[0], address(this), "Athlete address should be in registeredAthletes list");
+        address registered = nilContract.registeredAthletes(0);
+        Assert.equal(registered, address(this), "Athlete address should be in the list");
     }
 
-    // Test 2: Submit a NIL contract and check that it's stored
+    // Test 2: Submit NIL contract
     function testSubmitNILContract() public {
-        // Must register before submitting
-        nilContract.registerAthlete();
+        uint256 value = 0.5 ether;
+        string memory desc = "Endorsement Deal";
 
-        // Submit a NIL contract
-        nilContract.submitNILContract(
-            500000000000000000, // 0.5 ETH in wei
-            "Endorsement Deal",
-            true
-        );
-
-        // Get all contracts for this athlete (should include private and public if self)
+        nilContract.submitNILContract(value, desc, true);
         NILTransparencyContract.NILContract[] memory contracts = nilContract.viewAthleteContracts(address(this));
 
-        // Check contract values
-        Assert.equal(contracts.length, 1, "There should be one NIL contract submitted");
-        Assert.equal(contracts[0].contractValue, 500000000000000000, "Contract value should be 0.5 ETH in wei");
-        Assert.equal(contracts[0].isPublic, true, "Contract should be public");
+        Assert.equal(contracts.length, 1, "One NIL contract should be stored");
+        Assert.equal(contracts[0].contractValue, value, "Stored contract value should match");
+        Assert.equal(contracts[0].isPublic, true, "Contract visibility should be public");
+        Assert.equal(contracts[0].description, desc, "Description should match input");
+    }
+
+    // Test 3: Verify athlete
+    function testVerifyAthlete() public {
+        nilContract.verifyAthlete(address(this));
+        NILTransparencyContract.Athlete memory athlete = nilContract.athletes(address(this));
+        Assert.equal(athlete.isVerified, true, "Athlete should be marked as verified");
+    }
+
+    // ✅ Test 4: Log a non-payment transaction
+    function testLogTransaction() public {
+        string memory reason = "Appearance fee";
+        uint256 amount = 1 ether;
+
+        nilContract.logTransaction(amount, reason);
+        NILTransparencyContract.Transaction[] memory txs = nilContract.getAthleteTransactions(address(this));
+
+        Assert.equal(txs.length, 1, "There should be one logged transaction");
+        Assert.equal(txs[0].amount, amount, "Logged transaction amount mismatch");
+        Assert.equal(txs[0].purpose, reason, "Transaction purpose mismatch");
+        Assert.equal(txs[0].fromAddress, address(this), "Transaction sender should match");
     }
 }
