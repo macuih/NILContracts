@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 contract NILTransparencyContract {
     struct NILContract {
-        uint256 contractValue; // in wei, **need conversion in front end**
+        uint256 contractValue; // in wei
         string description;
         uint256 timestamp;
         bool isPublic;
@@ -76,7 +76,6 @@ contract NILTransparencyContract {
         require(athlete.isVerified, "Athlete not verified");
         require(msg.value > 0, "Must send ETH");
 
-        // Transfer ETH
         (bool sent, ) = athleteAddress.call{value: msg.value}("");
         require(sent, "Payment failed");
 
@@ -102,7 +101,7 @@ contract NILTransparencyContract {
         athletes[msg.sender].transactions.push(txRecord);
     }
 
-    // View contracts (with public/private filtering)
+    // View NIL contracts (with public/private filtering)
     function viewAthleteContracts(address athleteAddress) external view returns (NILContract[] memory) {
         Athlete storage athlete = athletes[athleteAddress];
         require(athlete.walletAddress != address(0), "Athlete not found");
@@ -111,7 +110,6 @@ contract NILTransparencyContract {
             return athlete.nilContracts;
         }
 
-        // Return only public contracts
         uint256 count = 0;
         for (uint256 i = 0; i < athlete.nilContracts.length; i++) {
             if (athlete.nilContracts[i].isPublic) {
@@ -131,15 +129,31 @@ contract NILTransparencyContract {
         return publicContracts;
     }
 
-    // Verify athlete (restricted to owner/auditor)
+    // Verify athlete (only owner)
     function verifyAthlete(address athleteAddress) external onlyOwner {
         require(athletes[athleteAddress].walletAddress != address(0), "Athlete not found");
         athletes[athleteAddress].isVerified = true;
     }
 
-    // View transactions for debugging/auditing
+    // View transaction history
     function getAthleteTransactions(address athleteAddress) external view returns (Transaction[] memory) {
         require(msg.sender == athleteAddress || msg.sender == owner, "Access denied");
         return athletes[athleteAddress].transactions;
+    }
+
+    // ✅ Helper function for tests: return athlete summary info
+    function getAthlete(address athleteAddress) external view returns (
+        address wallet,
+        bool isVerified,
+        uint256 contractCount,
+        uint256 transactionCount
+    ) {
+        Athlete storage a = athletes[athleteAddress];
+        return (
+            a.walletAddress,
+            a.isVerified,
+            a.nilContracts.length,
+            a.transactions.length
+        );
     }
 }
