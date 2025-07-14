@@ -10,10 +10,16 @@ function App() {
       {/* Tab Buttons */}
       <div style={{ marginBottom: "20px" }}>
         <button onClick={() => setActiveTab("register")}>Register</button>
-        <button onClick={() => setActiveTab("submitNIL")}>Submit NIL Contract</button>
-        <button onClick={() => setActiveTab("logTransaction")}>Log Transaction</button>
-        <button onClick={() => setActiveTab("viewContracts")}>View Contracts</button>
+        <button onClick={() => setActiveTab("submitActivity")}>
+          Submit Activity
+        </button>
+        <button onClick={() => setActiveTab("viewActivity")}>
+          View Athlete Activity
+        </button>
         <button onClick={() => setActiveTab("payAthlete")}>Pay Athlete</button>
+        <button onClick={() => setActiveTab("checkStatus")}>
+          Check Status
+        </button>
         <button onClick={() => setActiveTab("admin")}>Admin</button>
       </div>
 
@@ -22,36 +28,58 @@ function App() {
         {activeTab === "register" && (
           <div>
             <h2>Register as Athlete</h2>
-            <button onClick={() => console.log("registerAthlete()")}>Register</button>
+            <button onClick={() => console.log("registerAthlete()")}>
+              Register
+            </button>
           </div>
         )}
 
-        {activeTab === "submitNIL" && (
+        {activeTab === "submitActivity" && (
           <div>
-            <h2>Submit NIL Contract</h2>
-            <input placeholder="Contract Value (USD)" />
-            <input placeholder="Description" />
-            <label>
-              <input type="checkbox" /> Public?
-            </label>
-            <button onClick={() => console.log("submitNILContract()")}>Submit</button>
+            <h2>Submit NIL Activity</h2>
+
+            <div style={{ marginBottom: "20px" }}>
+              <h3>Submit NIL Contract</h3>
+              <input placeholder="Contract Value (ETH)" />
+              <input placeholder="Description" />
+              <label>
+                <input type="checkbox" /> Public?
+              </label>
+              <button onClick={() => console.log("submitNILContract()")}>
+                Submit Contract
+              </button>
+            </div>
+
+            <div>
+              <h3>Log Transaction</h3>
+              <input placeholder="Amount (ETH)" />
+              <input placeholder="Purpose" />
+              <button onClick={() => console.log("logTransaction()")}>
+                Log Transaction
+              </button>
+            </div>
           </div>
         )}
 
-        {activeTab === "logTransaction" && (
+        {activeTab === "viewActivity" && (
           <div>
-            <h2>Log Transaction</h2>
-            <input placeholder="Amount (ETH)" />
-            <input placeholder="Purpose" />
-            <button onClick={() => console.log("logTransaction()")}>Log</button>
-          </div>
-        )}
+            <h2>View Athlete Activity</h2>
 
-        {activeTab === "viewContracts" && (
-          <div>
-            <h2>View Contracts</h2>
-            <input placeholder="Athlete Address (optional)" />
-            <button onClick={() => console.log("viewAthleteContracts()")}>View</button>
+            <div style={{ marginBottom: "20px" }}>
+              <h3>View NIL Contracts</h3>
+              <input placeholder="Athlete Address" />
+              <button onClick={() => console.log("viewAthleteContracts()")}>
+                View Contracts
+              </button>
+            </div>
+
+            <div>
+              <h3>View Transactions</h3>
+              <input placeholder="Athlete Address" />
+              <button onClick={() => console.log("getAthleteTransactions()")}>
+                View Transactions
+              </button>
+            </div>
           </div>
         )}
 
@@ -61,7 +89,17 @@ function App() {
             <input placeholder="Athlete Address" />
             <input placeholder="Amount (ETH)" />
             <input placeholder="Purpose" />
-            <button onClick={() => console.log("payAthlete()")}>Send</button>
+            <button onClick={() => console.log("payAthlete()")}>
+              Send Payment
+            </button>
+          </div>
+        )}
+
+        {activeTab === "checkStatus" && (
+          <div>
+            <h2>Check Athlete Status</h2>
+            <input placeholder="Enter Athlete Address" />
+            <button onClick={() => console.log("getAthlete()")}>Check</button>
           </div>
         )}
 
@@ -69,7 +107,9 @@ function App() {
           <div>
             <h2>Admin Tools</h2>
             <input placeholder="Athlete Address" />
-            <button onClick={() => console.log("verifyAthlete()")}>Verify</button>
+            <button onClick={() => console.log("verifyAthlete()")}>
+              Verify Athlete
+            </button>
           </div>
         )}
       </div>
