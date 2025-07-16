@@ -7,7 +7,7 @@ module.exports = {
   },
   networks: {
     localhost: {
-      url: "http://ec2-3-144-201-231.us-east-2.compute.amazonaws.com:8545", 
+      url: "http://ec2-18-117-143-159.us-east-2.compute.amazonaws.com:8545", 
       chainId: 1337, 
     },
     hardhat: {
