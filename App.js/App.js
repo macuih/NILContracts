@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
 import React, { useState, useEffect } from "react";
-import { ethers } from "ethers";
-import NILContractABI from "./NILTransparencyContract.json"; // ensure ABI is here
+import { BrowserProvider, Contract, parseEther, formatEther } from "ethers";
+import contractAddress from "./artifacts/NILTransparencyContract-address.json";
+import contractArtifact from "./artifacts/NILTransparencyContract.json";
 
-const CONTRACT_ADDRESS = "<PASTE_YOUR_DEPLOYED_CONTRACT_ADDRESS_HERE>";
+const CONTRACT_ADDRESS = contractAddress.address;
+const NILContractABI = contractArtifact.abi;
 
 function App() {
   const [activeTab, setActiveTab] = useState("register");
@@ -30,10 +32,10 @@ function App() {
   useEffect(() => {
     const loadBlockchain = async () => {
       if (window.ethereum) {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const provider = new BrowserProvider(window.ethereum);
         await provider.send("eth_requestAccounts", []);
-        const signer = provider.getSigner();
-        const contractInstance = new ethers.Contract(CONTRACT_ADDRESS, NILContractABI.abi, signer);
+        const signer = await provider.getSigner();
+        const contractInstance = new Contract(CONTRACT_ADDRESS, NILContractABI, signer);
         const userAddress = await signer.getAddress();
 
         setContract(contractInstance);
@@ -57,7 +59,7 @@ function App() {
 
   const handleSubmitContract = async () => {
     try {
-      const value = ethers.utils.parseEther(contractValue || "0");
+      const value = parseEther(contractValue || "0");
       const tx = await contract.submitNILContract(value, description, isPublic);
       await tx.wait();
       alert("Contract submitted!");
@@ -68,7 +70,7 @@ function App() {
 
   const handleLogTransaction = async () => {
     try {
-      const amount = ethers.utils.parseEther(txAmount || "0");
+      const amount = parseEther(txAmount || "0");
       const tx = await contract.logTransaction(amount, purpose);
       await tx.wait();
       alert("Transaction logged!");
@@ -97,7 +99,7 @@ function App() {
 
   const handlePayAthlete = async () => {
     try {
-      const value = ethers.utils.parseEther(payAmount || "0");
+      const value = parseEther(payAmount || "0");
       const tx = await contract.payAthlete(payAddress, payPurpose, { value });
       await tx.wait();
       alert("Payment sent!");
@@ -169,7 +171,7 @@ function App() {
           <button onClick={handleViewContracts}>View Contracts</button>
           {contractsList.map((c, i) => (
             <div key={i}>
-              <p>Value: {ethers.utils.formatEther(c.contractValue)} ETH</p>
+              <p>Value: {formatEther(c.contractValue)} ETH</p>
               <p>Description: {c.description}</p>
               <p>Public: {c.isPublic ? "Yes" : "No"}</p>
             </div>
@@ -177,7 +179,7 @@ function App() {
           <button onClick={handleViewTransactions}>View Transactions</button>
           {transactionsList.map((t, i) => (
             <div key={i}>
-              <p>Amount: {ethers.utils.formatEther(t.amount)} ETH</p>
+              <p>Amount: {formatEther(t.amount)} ETH</p>
               <p>Purpose: {t.purpose}</p>
               <p>From: {t.fromAddress}</p>
             </div>
