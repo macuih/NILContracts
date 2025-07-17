@@ -18,6 +18,7 @@ function App() {
   const [isPublic, setIsPublic] = useState(false);
   const [txAmount, setTxAmount] = useState("");
   const [purpose, setPurpose] = useState("");
+  const [txIsPublic, setTxIsPublic] = useState(false);
   const [queryAddress, setQueryAddress] = useState("");
   const [payAddress, setPayAddress] = useState("");
   const [payAmount, setPayAmount] = useState("");
@@ -28,7 +29,7 @@ function App() {
   const [contractsList, setContractsList] = useState([]);
   const [transactionsList, setTransactionsList] = useState([]);
   const [athleteInfo, setAthleteInfo] = useState(null);
-  const [unverifiedAthletes, setUnverifiedAthletes] = useState([]); // ✅ New
+  const [unverifiedAthletes, setUnverifiedAthletes] = useState([]);
 
   useEffect(() => {
     const loadBlockchain = async () => {
@@ -72,7 +73,7 @@ function App() {
   const handleLogTransaction = async () => {
     try {
       const amount = parseEther(txAmount || "0");
-      const tx = await contract.logTransaction(amount, purpose);
+      const tx = await contract.logTransaction(amount, purpose, txIsPublic);
       await tx.wait();
       alert("Transaction logged!");
     } catch (err) {
@@ -186,6 +187,9 @@ function App() {
           <h3>Log Transaction</h3>
           <input placeholder="Amount (ETH)" value={txAmount} onChange={e => setTxAmount(e.target.value)} />
           <input placeholder="Purpose" value={purpose} onChange={e => setPurpose(e.target.value)} />
+          <label>
+            <input type="checkbox" checked={txIsPublic} onChange={e => setTxIsPublic(e.target.checked)} /> Public?
+          </label>
           <button onClick={handleLogTransaction}>Log Transaction</button>
         </div>
       )}
@@ -208,6 +212,7 @@ function App() {
               <p>Amount: {formatEther(t.amount)} ETH</p>
               <p>Purpose: {t.purpose}</p>
               <p>From: {t.fromAddress}</p>
+              <p>Public: {t.isPublic ? "Yes" : "No"}</p>
             </div>
           ))}
         </div>
