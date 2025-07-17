@@ -18,6 +18,7 @@ contract NILTransparencyContract {
         uint256 amount;
         string purpose;
         address fromAddress;
+        bool isPublic;
     }
 
     struct Athlete {
@@ -53,10 +54,10 @@ contract NILTransparencyContract {
     }
 
     // Log a transaction to the athlete's history
-    function logTransaction(uint256 amount, string memory purpose) public {
+    function logTransaction(uint256 amount, string memory purpose, bool isPublic) public {
         require(athletes[msg.sender].walletAddress != address(0), "Athlete not registered");
 
-        Transaction memory txRecord = Transaction(amount, purpose, msg.sender);
+        Transaction memory txRecord = Transaction(amount, purpose, msg.sender, isPublic);
         athleteTransactions[msg.sender].push(txRecord);
     }
 
@@ -65,44 +66,60 @@ contract NILTransparencyContract {
         require(athletes[athleteAddr].walletAddress != address(0), "Athlete not registered");
         require(msg.value > 0, "Payment must be greater than 0");
 
-        // Log transaction in recipient's history
-        Transaction memory txRecord = Transaction(msg.value, purpose, msg.sender);
+        Transaction memory txRecord = Transaction(msg.value, purpose, msg.sender, true);
         athleteTransactions[athleteAddr].push(txRecord);
 
-        // Transfer Ether to athlete
         athleteAddr.transfer(msg.value);
     }
 
     // View an athlete's NIL contracts
     function viewAthleteContracts(address athlete) public view returns (NILContract[] memory) {
-    // If the caller is the athlete or the contract owner, return all
-    if (msg.sender == athlete || msg.sender == owner) {
-        return athleteContracts[athlete];
-    }
-
-    // Else return only public contracts
-    uint count;
-    for (uint i = 0; i < athleteContracts[athlete].length; i++) {
-        if (athleteContracts[athlete][i].isPublic) {
-            count++;
+        if (msg.sender == athlete || msg.sender == owner) {
+            return athleteContracts[athlete];
         }
-    }
 
-    NILContract[] memory publicContracts = new NILContract[](count);
-    uint index = 0;
-    for (uint i = 0; i < athleteContracts[athlete].length; i++) {
-        if (athleteContracts[athlete][i].isPublic) {
-            publicContracts[index] = athleteContracts[athlete][i];
-            index++;
+        uint count;
+        for (uint i = 0; i < athleteContracts[athlete].length; i++) {
+            if (athleteContracts[athlete][i].isPublic) {
+                count++;
+            }
         }
+
+        NILContract[] memory publicContracts = new NILContract[](count);
+        uint index = 0;
+        for (uint i = 0; i < athleteContracts[athlete].length; i++) {
+            if (athleteContracts[athlete][i].isPublic) {
+                publicContracts[index] = athleteContracts[athlete][i];
+                index++;
+            }
+        }
+
+        return publicContracts;
     }
 
-    return publicContracts;
-}
-
-    // View an athlete's transactions
+    // View an athlete's transactions (respects isPublic flag)
     function getAthleteTransactions(address athlete) public view returns (Transaction[] memory) {
-        return athleteTransactions[athlete];
+        if (msg.sender == athlete || msg.sender == owner) {
+            return athleteTransactions[athlete];
+        }
+
+        uint count;
+        for (uint i = 0; i < athleteTransactions[athlete].length; i++) {
+            if (athleteTransactions[athlete][i].isPublic) {
+                count++;
+            }
+        }
+
+        Transaction[] memory publicTxs = new Transaction[](count);
+        uint index = 0;
+        for (uint i = 0; i < athleteTransactions[athlete].length; i++) {
+            if (athleteTransactions[athlete][i].isPublic) {
+                publicTxs[index] = athleteTransactions[athlete][i];
+                index++;
+            }
+        }
+
+        return publicTxs;
     }
 
     // View athlete details
@@ -126,4 +143,3 @@ contract NILTransparencyContract {
         return registeredAthletes;
     }
 }
-
