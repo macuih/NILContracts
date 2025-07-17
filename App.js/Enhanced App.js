@@ -28,6 +28,7 @@ function App() {
   const [contractsList, setContractsList] = useState([]);
   const [transactionsList, setTransactionsList] = useState([]);
   const [athleteInfo, setAthleteInfo] = useState(null);
+  const [unverifiedAthletes, setUnverifiedAthletes] = useState([]); // ✅ New
 
   useEffect(() => {
     const loadBlockchain = async () => {
@@ -117,13 +118,35 @@ function App() {
     }
   };
 
-  const handleVerifyAthlete = async () => {
+  const handleVerifyAthlete = async (addressToVerify) => {
     try {
-      const tx = await contract.verifyAthlete(verifyAddress);
+      const tx = await contract.verifyAthlete(addressToVerify);
       await tx.wait();
-      alert("Athlete verified!");
+      alert(`Athlete ${addressToVerify} verified!`);
+      loadUnverifiedAthletes();
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const loadUnverifiedAthletes = async () => {
+    try {
+      const allAthletes = await contract.getAllAthletes();
+      const unverified = [];
+
+      for (let i = 0; i < allAthletes.length; i++) {
+        const addr = allAthletes[i];
+        const athlete = await contract.getAthlete(addr);
+        const isVerified = athlete[1];
+
+        if (!isVerified) {
+          unverified.push(addr);
+        }
+      }
+
+      setUnverifiedAthletes(unverified);
+    } catch (err) {
+      console.error("Error loading unverified athletes:", err);
     }
   };
 
@@ -136,7 +159,10 @@ function App() {
         <button onClick={() => setActiveTab("viewActivity")}>View Athlete Activity</button>
         <button onClick={() => setActiveTab("payAthlete")}>Pay Athlete</button>
         <button onClick={() => setActiveTab("checkStatus")}>Check Status</button>
-        <button onClick={() => setActiveTab("admin")}>Admin</button>
+        <button onClick={() => {
+          setActiveTab("admin");
+          loadUnverifiedAthletes();
+        }}>Admin</button>
       </div>
 
       {activeTab === "register" && (
@@ -216,8 +242,16 @@ function App() {
       {activeTab === "admin" && (
         <div>
           <h2>Admin Tools</h2>
-          <input placeholder="Athlete Address" value={verifyAddress} onChange={e => setVerifyAddress(e.target.value)} />
-          <button onClick={handleVerifyAthlete}>Verify Athlete</button>
+          {unverifiedAthletes.length === 0 ? (
+            <p>No unverified athletes found.</p>
+          ) : (
+            unverifiedAthletes.map((addr, i) => (
+              <div key={i} style={{ marginBottom: "10px" }}>
+                <p>{addr}</p>
+                <button onClick={() => handleVerifyAthlete(addr)}>Verify</button>
+              </div>
+            ))
+          )}
         </div>
       )}
     </div>
